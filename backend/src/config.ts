@@ -22,3 +22,9 @@ export const REFRESH_TOKEN = {
         } as CookieOptions,
     },
 }
+
+export const limiter = {
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    message: 'Слишком много запросов с данного IP, пожалуйста, попробуйте через 1 минуту'
+}

@@ -37,20 +37,16 @@ class Api {
     constructor(baseUrl: string, options: RequestInit = {}) {
         this.baseUrl = baseUrl
         this.options = {
+            credentials: 'include',
             headers: {
                 ...((options.headers as object) ?? {}),
+                'CSRF-Token': getCookie('csrfToken') ?? ''
             },
         }
     }
 
     protected handleResponse<T>(response: Response): Promise<T> {
-        return response.ok
-            ? response.json()
-            : response
-                  .json()
-                  .then((err) =>
-                      Promise.reject({ ...err, statusCode: response.status })
-                  )
+        return response.ok ? response.json() : response.json().then((err) => Promise.reject({ ...err, statusCode: response.status }))
     }
 
     protected async request<T>(endpoint: string, options: RequestInit) {
