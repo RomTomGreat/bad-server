@@ -16,9 +16,9 @@ export function adapterCustomersFromServer(
         lastOrderDate: {
             title: customerFromServer.lastOrderDate
                 ? format(
-                    new Date(customerFromServer.lastOrderDate),
-                    'dd.MM.yyyy'
-                )
+                      new Date(customerFromServer.lastOrderDate),
+                      'dd.MM.yyyy'
+                  )
                 : 'Заказ не совершал',
             value: customerFromServer.lastOrderDate
                 ? customerFromServer.lastOrderDate
@@ -37,8 +37,8 @@ export function adapterCustomersFromServer(
         },
         lastOrder: customerFromServer.lastOrder
             ? customerFromServer.lastOrder?.products.map(
-                (product) => product.title
-            )
+                  (product) => product.title
+              )
             : [],
         /** Не используется в таблице */
         name: {
@@ -53,6 +53,11 @@ export function adapterCustomersFromServer(
                 ? customerFromServer.lastOrder?.deliveryAddress
                 : '',
         },
-        contacts: customerFromServer.lastOrder ? [customerFromServer.lastOrder.phone, customerFromServer.lastOrder.email] : ['Нет контактов'],
+        contacts: customerFromServer.lastOrder
+            ? [
+                  customerFromServer.lastOrder.phone,
+                  customerFromServer.lastOrder.email,
+              ]
+            : ['Нет контактов'],
     }))
 }

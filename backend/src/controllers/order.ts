@@ -29,7 +29,22 @@ export const getOrders = async (
             search,
         } = req.query
 
+        const correctLimit = Math.min(Number(limit), 5).toString()
         const filters: FilterQuery<Partial<IOrder>> = {}
+
+        if (status) {
+            if (typeof status === 'string' && /^[a-zA-Z0-9_-]+$/.test(status)) {
+                filters.status = status
+            } else {
+                throw new BadRequestError('Передан невалидный параметр статуса')
+            }
+        }
+
+        if (search) {
+            if (/[^\w\s]/.test(search as string)) {
+                throw new BadRequestError('Передан невалидный поисковый запрос')
+            }
+        }
 
         if (status) {
             if (typeof status === 'object') {
@@ -117,8 +132,8 @@ export const getOrders = async (
 
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(page) - 1) * Number(limit) },
-            { $limit: Number(limit) },
+            { $skip: (Number(page) - 1) * Number(correctLimit) },
+            { $limit: Number(correctLimit) },
             {
                 $group: {
                     _id: '$_id',
@@ -134,7 +149,7 @@ export const getOrders = async (
 
         const orders = await Order.aggregate(aggregatePipeline)
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / Number(correctLimit))
 
         res.status(200).json({
             orders,
@@ -142,7 +157,7 @@ export const getOrders = async (
                 totalOrders,
                 totalPages,
                 currentPage: Number(page),
-                pageSize: Number(limit),
+                pageSize: Number(correctLimit),
             },
         })
     } catch (error) {
@@ -158,9 +173,10 @@ export const getOrdersCurrentUser = async (
     try {
         const userId = res.locals.user._id
         const { search, page = 1, limit = 5 } = req.query
+        const correctLimit = Math.min(Number(limit), 5).toString()
         const options = {
             skip: (Number(page) - 1) * Number(limit),
-            limit: Number(limit),
+            limit: Number(correctLimit),
         }
 
         const user = await User.findById(userId)
@@ -206,7 +222,7 @@ export const getOrdersCurrentUser = async (
         }
 
         const totalOrders = orders.length
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / Number(correctLimit))
 
         orders = orders.slice(options.skip, options.skip + options.limit)
 
@@ -216,7 +232,7 @@ export const getOrdersCurrentUser = async (
                 totalOrders,
                 totalPages,
                 currentPage: Number(page),
-                pageSize: Number(limit),
+                pageSize: Number(correctLimit),
             },
         })
     } catch (error) {
@@ -292,7 +308,8 @@ export const createOrder = async (
         const basket: IProduct[] = []
         const products = await Product.find<IProduct>({})
         const userId = res.locals.user._id
-        const { address, payment, phone, total, email, items, comment } = req.body
+        const { address, payment, phone, total, email, items, comment } =
+            req.body
 
         if (phone && !validator.isMobilePhone(phone)) {
             throw new BadRequestError('Номер телефона не валиден')

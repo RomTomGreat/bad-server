@@ -1,3 +1,4 @@
+import { DoubleCsrfConfigOptions } from 'csrf-csrf'
 import { CookieOptions } from 'express'
 import ms from 'ms'
 
@@ -23,8 +24,31 @@ export const REFRESH_TOKEN = {
     },
 }
 
+export const doubleCsrfOptions: DoubleCsrfConfigOptions = {
+    getSecret: () => process.env.CSRF_SECRET || '___Secret___',
+    cookieName: process.env.CSRF_COOKIE_NAME || '__Host-larek.x-csrf-token',
+    cookieOptions: {
+        sameSite: 'strict',
+        path: '/',
+        secure: process.env.CSRF_COOKIE_IS_SECURE
+            ? process.env.CSRF_COOKIE_IS_SECURE.toUpperCase() === 'TRUE'
+            : true,
+    },
+}
+
+export const allowedOrigins =
+    process.env.ORIGIN_ALLOW && process.env.ORIGIN_ALLOW.indexOf(',') >= 0
+        ? process.env.ALLOWED_ORIGINS?.split(',')
+        : process.env.ORIGIN_ALLOW || 'http://localhost'
+
 export const limiter = {
     windowMs: 15 * 60 * 1000,
     limit: 100,
-    message: 'Слишком много запросов с данного IP, пожалуйста, попробуйте через 1 минуту'
+    message:
+        'Слишком много запросов с данного IP, пожалуйста, попробуйте через 1 минуту',
+}
+
+export const fileSizeConfig = {
+    maxSize: Number(process.env.MAX_FILE_SIZE) || 10e6,
+    minSize: Number(process.env.MIN_FILE_SIZE) || 2e3,
 }

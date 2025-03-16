@@ -8,7 +8,7 @@ import ExpressMongoSanitize from 'express-mongo-sanitize'
 import winston from 'winston'
 import rateLimit from 'express-rate-limit'
 import path from 'path'
-import { DB_ADDRESS, limiter } from './config'
+import { allowedOrigins, DB_ADDRESS, limiter } from './config'
 import errorHandler from './middlewares/error-handler'
 import serveStatic from './middlewares/serverStatic'
 import routes from './routes'
@@ -37,7 +37,13 @@ app.use((err: Error, _req: Request, _res: Response, next: NextFunction) => {
 app.use(rateLimit(limiter))
 app.use(ExpressMongoSanitize())
 app.use(cookieParser())
-app.use(cors({methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], credentials: true}))
+app.use(
+    cors({
+        origin: allowedOrigins,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        credentials: true,
+    })
+)
 app.use(serveStatic(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 app.use(express.json({ limit: '10kb' }))
@@ -48,7 +54,9 @@ app.use(errorHandler)
 const bootstrap = async () => {
     try {
         await mongoose.connect(DB_ADDRESS)
-        await app.listen(PORT, () => console.log('server is running on port:', PORT))
+        await app.listen(PORT, () =>
+            console.log('server is running on port:', PORT)
+        )
     } catch (error) {
         console.error('error connecting to the database:', error)
     }
