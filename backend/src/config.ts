@@ -43,9 +43,10 @@ export const allowedOrigins =
 
 export const limiter = {
     windowMs: 15 * 60 * 1000,
-    limit: 100,
-    message:
-        'Слишком много запросов с данного IP, пожалуйста, попробуйте через 1 минуту',
+    max: 40,
+    message: 'Слишком много запросов с данного IP, пожалуйста, попробуйте через 15 минут',
+    standardHeaders: true,
+    legacyHeaders: false
 }
 
 export const fileSizeConfig = {
